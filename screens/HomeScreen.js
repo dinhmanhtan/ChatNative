@@ -13,13 +13,24 @@ import {
 import {Auth, DataStore} from 'aws-amplify';
 import {ChatRoom, ChatRoomUser, Message} from '../src/models';
 import ChatRoomItem from '../components/ChatRoomItem';
+import {Voximplant} from 'react-native-voximplant';
+import calls from '../components/VideoCall/Store';
+import {useNavigation} from '@react-navigation/native';
+
+// import {
+//   VOXIMPLANT_ACCOUNT,
+//   VOXIMPLANT_APP,
+//   PASS,
+// } from '../components/VideoCall/Constants';
 
 export default function HomeScreen() {
   LogBox.ignoreAllLogs();
   const [chatRooms, setChatRooms] = useState([]);
-  const [tempChatRoom, setTempChatRoom] = useState(null);
   const [observe, setObserve] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
+  const voximplant = Voximplant.getInstance();
+
+  const navigation = useNavigation();
 
   const fetchuserAuth = async () => {
     // console.log('bb');
@@ -37,7 +48,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fb = item => {
-      console.log('item');
+      // console.log('item');
       setChatRooms(
         item
           .filter(
@@ -50,7 +61,7 @@ export default function HomeScreen() {
     };
 
     const fetchChatRooms = async () => {
-      console.log('fetchChatRooms');
+      // console.log('fetchChatRooms');
       const b = await DataStore.query(ChatRoomUser).then(fb);
     };
 
@@ -116,12 +127,27 @@ export default function HomeScreen() {
   //     return () => subscription.unsubscribe();
   //   }
   // }, [userAuth]);
-  console.log('rooms', chatRooms);
+  // console.log('rooms', chatRooms);
+
+  // Listen for coming call
+  useEffect(() => {
+    // console.log('islogin', isLoginCall);
+
+    voximplant.on(Voximplant.ClientEvents.IncomingCall, incomingCallEvent => {
+      calls.set(incomingCallEvent.call.callId, incomingCallEvent.call);
+      navigation.navigate('IncomingCall', {
+        callId: incomingCallEvent.call.callId,
+      });
+    });
+    return function cleanup() {
+      voximplant.off(Voximplant.ClientEvents.IncomingCall);
+    };
+  });
 
   if (!userAuth) {
     return <ActivityIndicator />;
   } else {
-    console.log(userAuth);
+    // console.log(userAuth);
   }
 
   return (

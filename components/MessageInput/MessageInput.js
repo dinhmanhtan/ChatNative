@@ -9,13 +9,13 @@ import {
   Image,
   Text,
 } from 'react-native';
-import {
-  SimpleLineIcons,
-  Feather,
-  MaterialCommunityIcons,
-  AntDesign,
-  Ionicons,
-} from '@expo/vector-icons';
+
+import Feather from 'react-native-vector-icons/Feather';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import {DataStore} from '@aws-amplify/datastore';
 import {ChatRoom, Message} from '../../src/models';
 import {Auth, Storage} from 'aws-amplify';
@@ -427,7 +427,7 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
           {message || image || soundURI || documentURI ? (
             <Ionicons name="send" size={18} color="white" />
           ) : (
-            <AntDesign name="plus" size={24} color="white" />
+            <AntDesign name="plus" size={28} color="white" />
           )}
         </Pressable>
       </View>
@@ -442,6 +442,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   inputContainer: {
     backgroundColor: '#f2f2f2',
@@ -452,7 +453,6 @@ const styles = StyleSheet.create({
     borderColor: '#dedede',
     alignItems: 'center',
     flexDirection: 'row',
-    padding: 5,
   },
   input: {
     flex: 1,

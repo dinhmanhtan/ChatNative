@@ -218,7 +218,7 @@ export default function ChatRoomScreen({navigation}) {
         )}
         // inverted
       />
-      <Modal
+      {/* <Modal
         visible={false}
         style={{
           backgroundColor: 'red',
@@ -231,7 +231,7 @@ export default function ChatRoomScreen({navigation}) {
         <AntDesign name="like2" size={24} color="black" />
         <AntDesign name="like2" size={24} color="black" />
         <AntDesign name="like2" size={24} color="black" />
-      </Modal>
+      </Modal> */}
       <MessageInput
         chatRoom={chatRoom}
         messageReplyTo={messageReplyTo}

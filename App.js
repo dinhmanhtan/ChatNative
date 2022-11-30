@@ -8,6 +8,12 @@ import {withAuthenticator} from 'aws-amplify-react-native';
 import {Message, User} from './src/models';
 import {AmplifyTheme} from 'aws-amplify-react-native';
 import {StatusBar} from 'react-native';
+import {Voximplant} from 'react-native-voximplant';
+import {
+  VOXIMPLANT_ACCOUNT,
+  VOXIMPLANT_APP,
+  PASS,
+} from './components/VideoCall/Constants';
 
 // import moment from "moment";
 
@@ -18,6 +24,8 @@ function App() {
   // const colorScheme = useColorScheme();
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const voximplant = Voximplant.getInstance();
+  const [isLoginCall, setIsLoginCall] = useState(false);
 
   const fetchUser = async () => {
     const userData = await Auth.currentAuthenticatedUser();
@@ -112,6 +120,85 @@ function App() {
     setUser(response);
     console.log(response);
   };
+
+  // Video Call
+
+  async function login() {
+    // console.log(userAuth);
+    console.log(
+      `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+    );
+    try {
+      let clientState = await voximplant.getClientState();
+      if (clientState === Voximplant.ClientState.DISCONNECTED) {
+        await voximplant.connect();
+        await voximplant.login(
+          `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+          PASS,
+        );
+      }
+      if (clientState === Voximplant.ClientState.CONNECTED) {
+        await voximplant.login(
+          `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+          PASS,
+        );
+      }
+      setIsLoginCall(true);
+      console.log('login1');
+    } catch (e) {
+      let message;
+      switch (e.name) {
+        case Voximplant.ClientEvents.ConnectionFailed:
+          message = 'Connection error, check your internet connection';
+          break;
+        case Voximplant.ClientEvents.AuthResult:
+          message = convertCodeMessage(e.code);
+          break;
+        default:
+          message = 'Unknown error. Try again';
+      }
+      showLoginError(message);
+    }
+  }
+
+  function convertCodeMessage(code) {
+    switch (code) {
+      case 401:
+        return 'Invalid password';
+      case 404:
+        return 'Invalid user';
+      case 491:
+        return 'Invalid state';
+      default:
+        return 'Try again later';
+    }
+  }
+
+  function showLoginError(message) {
+    console.log(message);
+    Alert.alert('Login error', message, [
+      {
+        text: 'OK',
+      },
+    ]);
+  }
+
+  useEffect(() => {
+    if (userData) {
+      login();
+    }
+  }, [userData]);
+  // console.log(isLoginCall);
+  // const VoximplantApiClient = require('@voximplant/apiclient-nodejs').default;
+  // const getCallUser = async () => {
+  //   const client = new VoximplantApiClient();
+  //   client.onReady = function () {
+  //     // Get two first identities.
+  //     client.Users.getUsers({applicationId: '1', count: '2'})
+  //       .then(ev => console.log(ev))
+  //       .catch(err => console.error(err));
+  //   };
+  // };
 
   // if (!userData) {
   //   console.log('null');

@@ -14,7 +14,7 @@ import {Auth, Storage} from 'aws-amplify';
 import {S3Image} from 'aws-amplify-react-native';
 import {useWindowDimensions} from 'react-native';
 // import AudioPlayer from '../AudioPlayer';
-import {Ionicons} from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Message as MessageModel} from '../../src/models';
 import MessageReply from '../MessageReply';
 import DocumentMsg from '../DocumentMsg';

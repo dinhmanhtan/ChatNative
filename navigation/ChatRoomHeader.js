@@ -1,10 +1,24 @@
-import {View, Image, Text, useWindowDimensions, Pressable} from 'react-native';
+import {
+  View,
+  Image,
+  Text,
+  useWindowDimensions,
+  Pressable,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Feather} from '@expo/vector-icons';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Auth, DataStore} from 'aws-amplify';
 import {ChatRoom, ChatRoomUser, User} from '../src/models';
 import moment from 'moment';
 import {useNavigation} from '@react-navigation/core';
+import {
+  VOXIMPLANT_ACCOUNT,
+  VOXIMPLANT_APP,
+} from '../components/VideoCall/Constants';
+import {Voximplant} from 'react-native-voximplant';
 
 const ChatRoomHeader = ({id, children}) => {
   const {width} = useWindowDimensions();
@@ -66,21 +80,98 @@ const ChatRoomHeader = ({id, children}) => {
 
   const isGroup = allUsers.length > 2;
 
+  //
+  async function makeCall(isVideoCall) {
+    console.log('user', user.name);
+    try {
+      if (Platform.OS === 'android') {
+        let permissions = [PermissionsAndroid.PERMISSIONS.RECORD_AUDIO];
+        if (isVideoCall) {
+          permissions.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+        }
+        const granted = await PermissionsAndroid.requestMultiple(permissions);
+        const recordAudioGranted =
+          granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted';
+        const cameraGranted =
+          granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted';
+        if (recordAudioGranted) {
+          if (isVideoCall && !cameraGranted) {
+            console.warn(
+              'MainScreen: makeCall: camera permission is not granted',
+            );
+            return;
+          }
+        } else {
+          console.warn(
+            'MainScreen: makeCall: record audio permission is not granted',
+          );
+          return;
+        }
+      }
+      navigation.navigate('Call', {
+        isVideoCall: isVideoCall,
+        callee: `${user.name}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+        isIncomingCall: false,
+        chatroomID: id,
+      });
+    } catch (e) {
+      console.warn(`MainScreen: makeCall failed: ${e}`);
+    }
+  }
+  //
+  useEffect(() => {
+    login();
+  }, []);
+  const voximplant = Voximplant.getInstance();
+  async function login() {
+    const userData = await Auth.currentAuthenticatedUser();
+    try {
+      let clientState = await voximplant.getClientState();
+      if (clientState === Voximplant.ClientState.DISCONNECTED) {
+        await voximplant.connect();
+        await voximplant.login(
+          `${userData.attributes.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+          PASS,
+        );
+      }
+      if (clientState === Voximplant.ClientState.CONNECTED) {
+        await voximplant.login(
+          `${userData.attributes.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+          PASS,
+        );
+      }
+    } catch (e) {
+      let message;
+      switch (e.name) {
+        case Voximplant.ClientEvents.ConnectionFailed:
+          message = 'Connection error, check your internet connection';
+          break;
+        case Voximplant.ClientEvents.AuthResult:
+          message = 'Error authentication';
+          break;
+        default:
+          message = 'Unknown error. Try again';
+      }
+      // showLoginError(message);
+    }
+  }
+
   return (
     <Pressable
-      onPress={openInfo}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
         alignItems: 'center',
       }}>
-      <Image
-        source={{
-          uri: chatRoom?.imageUri || user?.imageUri,
-        }}
-        style={{width: 30, height: 30, borderRadius: 30}}
-      />
+      <Pressable onPress={openInfo}>
+        <Image
+          source={{
+            uri: chatRoom?.imageUri || user?.imageUri,
+          }}
+          style={{width: 30, height: 30, borderRadius: 30}}
+        />
+      </Pressable>
 
       <View style={{flex: 1, marginLeft: 10}}>
         <Text style={{fontWeight: 'bold'}}>{chatRoom?.name || user?.name}</Text>
@@ -88,19 +179,20 @@ const ChatRoomHeader = ({id, children}) => {
           {isGroup ? getUsernames() : getLastOnlineText()}
         </Text>
       </View>
-
-      <Feather
-        name="camera"
+      <MaterialIcons
+        name="call"
         size={24}
         color="black"
-        style={{marginHorizontal: 10}}
+        style={{marginRight: 5}}
       />
-      <Feather
-        name="edit-2"
-        size={24}
-        color="black"
-        style={{marginHorizontal: 10}}
-      />
+      <Pressable onPress={() => makeCall(true)}>
+        <MaterialIcons
+          name="video-call"
+          size={27}
+          color="black"
+          style={{marginLeft: 10}}
+        />
+      </Pressable>
     </Pressable>
   );
 };

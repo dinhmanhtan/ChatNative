@@ -7,13 +7,17 @@ import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import * as React from 'react';
 import {View, Text, Image, useWindowDimensions, Pressable} from 'react-native';
-import {Feather} from '@expo/vector-icons';
+import Feather from 'react-native-vector-icons/Feather';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import HomeScreen from '../screens/HomeScreen';
 import UsersScreen from '../screens/UsersScreen';
 import ChatRoomHeader from './ChatRoomHeader';
 import GroupInfoScreen from '../screens/GroupInfoScreen';
 import ProfileScreen from '../components/Profile/Profile';
+import LoginScreen from '../components/VideoCall/LoginScreen';
+import MainScreen from '../components/VideoCall/MainScreen';
+import CallScreen from '../components/VideoCall/CallScreen';
+import IncomingCallScreen from '../components/VideoCall/IncomingCallScreen';
 // import LocationScreen from '../screens/LocationScreen';
 
 const Stack = createStackNavigator();
@@ -49,6 +53,28 @@ const Navigation = () => {
           options={{
             title: 'Profile',
           }}
+        />
+        <Stack.Screen
+          name="LoginScreen"
+          component={LoginScreen}
+          options={{
+            title: 'Login Video Call',
+          }}
+        />
+        <Stack.Screen
+          name="Main"
+          component={MainScreen}
+          options={{headerLeft: null}}
+        />
+        <Stack.Screen
+          name="Call"
+          component={CallScreen}
+          options={{headerLeft: null}}
+        />
+        <Stack.Screen
+          name="IncomingCall"
+          component={IncomingCallScreen}
+          options={{headerLeft: null}}
         />
         {/* <Stack.Screen
           name="LocationScreen"
@@ -96,14 +122,14 @@ const HomeHeader = props => {
         name="camera"
         size={24}
         color="black"
-        // style={{marginHorizontal: 10}}
+        style={{marginHorizontal: 10}}
       />
       <Pressable onPress={() => navigation.navigate('UsersScreen')}>
         <Feather
           name="edit-2"
           size={24}
           color="black"
-          // style={{marginHorizontal: 10}}
+          style={{marginHorizontal: 10}}
         />
       </Pressable>
     </View>
