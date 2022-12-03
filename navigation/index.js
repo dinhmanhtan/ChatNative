@@ -18,7 +18,8 @@ import LoginScreen from '../components/VideoCall/LoginScreen';
 import MainScreen from '../components/VideoCall/MainScreen';
 import CallScreen from '../components/VideoCall/CallScreen';
 import IncomingCallScreen from '../components/VideoCall/IncomingCallScreen';
-// import LocationScreen from '../screens/LocationScreen';
+import LocationScreen from '../screens/LocationScreen';
+import DocumentScreen from '../screens/DocumentScreen';
 
 const Stack = createStackNavigator();
 
@@ -76,13 +77,18 @@ const Navigation = () => {
           component={IncomingCallScreen}
           options={{headerLeft: null}}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
+          name="DocumentScreen"
+          component={DocumentScreen}
+          options={{title: null}}
+        />
+        <Stack.Screen
           name="LocationScreen"
           component={LocationScreen}
           options={{
             title: 'Location',
           }}
-        /> */}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

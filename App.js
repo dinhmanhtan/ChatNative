@@ -26,12 +26,13 @@ function App() {
   const [userData, setUserData] = useState(null);
   const voximplant = Voximplant.getInstance();
   const [isLoginCall, setIsLoginCall] = useState(false);
+  const [isAddCalluser, setIsAddCallUser] = useState(false);
 
   const fetchUser = async () => {
     const userData = await Auth.currentAuthenticatedUser();
     const user = await DataStore.query(User, userData.attributes.sub);
     // const users = await DataStore.query(User);
-    console.log('userdata', userData);
+    // console.log('userdata', userData);
     // console.log("users", users);
     // console.log("user", user);
     if (user) {
@@ -123,6 +124,51 @@ function App() {
 
   // Video Call
 
+  // const [userCalls, setUserCalls] = useState(null);
+  // const [fetchUsers, setFetchUsers] = useState(false);
+
+  // const getArticlesFromApi = () => {
+  //   fetch(
+  //     'https://api.voximplant.com/platform_api/GetUsers/?account_id=5733968&application_id=10523132&api_key=dab228ec-81bd-40c3-b4c7-ba33125f4e97',
+  //   )
+  //     .then(response => response.json())
+  //     .then(json => setData(json.result.map(user => user.user_name)))
+  //     .finally(() => setFetchUsers(true));
+  // };
+
+  // ----------------- Register user to Voximplant
+
+  const postUser = () => {
+    fetch(
+      `https://api.voximplant.com/platform_api/AddUser/?account_id=5733968&user_name=${userData.username}&user_display_name=${userData.username}&user_password=12345678&application_id=10523132&api_key=dab228ec-81bd-40c3-b4c7-ba33125f4e97`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstParam: 'yourValue',
+          secondParam: 'yourOtherValue',
+        }),
+      },
+    )
+      .then(response => response.json())
+      .then(json => console.log(json))
+      .finally(() => setIsAddCallUser(true));
+  };
+
+  // useEffect(() => {
+  //   getArticlesFromApi();
+  // }, []);
+
+  useEffect(() => {
+    if (userData) {
+      postUser();
+    }
+  }, [userData]);
+
+  //--------------- Login user to Voximplant
   async function login() {
     // console.log(userAuth);
     console.log(
@@ -184,26 +230,10 @@ function App() {
   }
 
   useEffect(() => {
-    if (userData) {
+    if (userData && isAddCalluser) {
       login();
     }
-  }, [userData]);
-  // console.log(isLoginCall);
-  // const VoximplantApiClient = require('@voximplant/apiclient-nodejs').default;
-  // const getCallUser = async () => {
-  //   const client = new VoximplantApiClient();
-  //   client.onReady = function () {
-  //     // Get two first identities.
-  //     client.Users.getUsers({applicationId: '1', count: '2'})
-  //       .then(ev => console.log(ev))
-  //       .catch(err => console.error(err));
-  //   };
-  // };
-
-  // if (!userData) {
-  //   console.log('null');
-  //   return null;
-  // }
+  }, [userData, isAddCalluser]);
 
   return (
     <SafeAreaProvider>

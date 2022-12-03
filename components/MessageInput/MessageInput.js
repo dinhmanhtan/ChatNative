@@ -20,14 +20,16 @@ import {DataStore} from '@aws-amplify/datastore';
 import {ChatRoom, Message} from '../../src/models';
 import {Auth, Storage} from 'aws-amplify';
 import EmojiModal from 'react-native-emoji-modal';
-// import * as ImagePicker from 'expo-image-picker';
+
 import 'react-native-get-random-values';
 import {v4 as uuidv4} from 'uuid';
 // import {Audio, AVPlaybackStatus} from 'expo-av';
 // import AudioPlayer from '../AudioPlayer';
 import MessageComponent from '../Message';
-// import * as DocumentPicker from 'expo-document-picker';
+import DocumentPicker from 'react-native-document-picker';
+
 import {useNavigation} from '@react-navigation/core';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
   const [message, setMessage] = useState('');
@@ -59,11 +61,11 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
   //   })();
   // }, []);
 
-  // const pickDocument = async () => {
-  //   let result = await DocumentPicker.getDocumentAsync({});
-  //   console.log(result);
-  //   setDocumentURI(result.uri);
-  // };
+  const pickDocument = async () => {
+    let result = await DocumentPicker.pick({});
+    console.log(result[0]);
+    setDocumentURI(result[0]);
+  };
 
   const sendMessage = async () => {
     // send message
@@ -120,29 +122,24 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
   };
 
   // Image picker
-  // const pickImage = async () => {
-  //   const result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //     allowsEditing: true,
-  //     aspect: [4, 3],
-  //     quality: 0.5,
-  //   });
+  const takePhoto = async () => {
+    const result = await launchCamera({
+      mediaType: 'photo',
+    });
+    // console.log(result.assets[0]);
 
-  //   if (!result.cancelled) {
-  //     setImage(result.uri);
-  //   }
-  // };
+    if (!result.didCancel) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
-  // const takePhoto = async () => {
-  //   const result = await ImagePicker.launchCameraAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //     aspect: [4, 3],
-  //   });
-
-  //   if (!result.cancelled) {
-  //     setImage(result.uri);
-  //   }
-  // };
+  const pickImage = async () => {
+    const result = await launchImageLibrary();
+    // console.log(result);
+    if (!result.didCancel) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const progressCallback = progress => {
     setProgress(progress.loaded / progress.total);
@@ -152,8 +149,10 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
     if (!image) {
       return;
     }
+    const uriParts = image.split('.');
+    const extenstion = uriParts[uriParts.length - 1];
     const blob = await getBlob(image);
-    const {key} = await Storage.put(`${uuidv4()}.png`, blob, {
+    const {key} = await Storage.put(`${uuidv4()}.${extenstion}`, blob, {
       progressCallback,
     });
 
@@ -251,9 +250,9 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
     if (!documentURI) {
       return;
     }
-    const uriParts = documentURI.split('.');
+    const uriParts = documentURI.name.split('.');
     const extenstion = uriParts[uriParts.length - 1];
-    const blob = await getBlob(documentURI);
+    const blob = await getBlob(documentURI.uri);
     const {key} = await Storage.put(`${uuidv4()}.${extenstion}`, blob, {
       progressCallback,
     });
@@ -381,21 +380,20 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
             onPressIn={() => setIsEmojiPickerOpen(false)}
           />
           <Pressable
-          // onPress={() =>
-          //   navigation.navigate('LocationScreen', {
-          //     chatRoom: chatRoom,
-          //     replyToMessageID: messageReplyTo?.id,
-          //   })
-          // }
-          >
+            onPress={() =>
+              navigation.navigate('LocationScreen', {
+                chatRoom: chatRoom,
+                replyToMessageID: messageReplyTo?.id,
+              })
+            }>
             <Ionicons name="ios-location-outline" size={24} color="black" />
           </Pressable>
-          {/* onPress={pickDocument} */}
-          <Pressable>
+
+          <Pressable onPress={pickDocument}>
             <Ionicons name="document-attach-outline" size={24} color="black" />
           </Pressable>
-          {/* onPress={pickImage} */}
-          <Pressable>
+
+          <Pressable onPress={pickImage}>
             <Feather
               name="image"
               size={24}
@@ -403,8 +401,8 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
               style={styles.icon}
             />
           </Pressable>
-          {/* onPress={takePhoto} */}
-          <Pressable>
+
+          <Pressable onPress={takePhoto}>
             <Feather
               name="camera"
               size={24}

@@ -20,7 +20,6 @@ import Message from '../components/Message';
 import MessageInput from '../components/MessageInput';
 import {SortDirection, Auth, Storage} from 'aws-amplify';
 import {Modal} from 'react-native-paper';
-import {AntDesign} from '@expo/vector-icons';
 
 export default function ChatRoomScreen({navigation}) {
   LogBox.ignoreAllLogs();
@@ -227,10 +226,7 @@ export default function ChatRoomScreen({navigation}) {
           display: 'flex',
           flexDirection: 'row',
         }}>
-        <AntDesign name="like2" size={24} color="black" />
-        <AntDesign name="like2" size={24} color="black" />
-        <AntDesign name="like2" size={24} color="black" />
-        <AntDesign name="like2" size={24} color="black" />
+     
       </Modal> */}
       <MessageInput
         chatRoom={chatRoom}

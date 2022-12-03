@@ -1,9 +1,9 @@
-import { FontAwesome } from "@expo/vector-icons";
-import React from "react";
-import { Pressable, View, StyleSheet } from "react-native";
-import { Text, TouchableRipple } from "react-native-paper";
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import React from 'react';
+import {Pressable, View, StyleSheet} from 'react-native';
+import {Text, TouchableRipple} from 'react-native-paper';
 
-const NewGroupButton = ({ onPress }) => {
+const NewGroupButton = ({onPress}) => {
   return (
     <TouchableRipple onPress={onPress}>
       <View style={styles.menuItem}>
@@ -22,14 +22,14 @@ const styles = StyleSheet.create({
   },
 
   menuItem: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 15,
     paddingHorizontal: 20,
   },
   menuItemText: {
-    color: "black",
+    color: 'black',
     marginLeft: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 16,
     lineHeight: 26,
   },

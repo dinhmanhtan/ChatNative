@@ -13,7 +13,7 @@ import {User} from '../../src/models';
 import {Auth, Storage} from 'aws-amplify';
 import {S3Image} from 'aws-amplify-react-native';
 import {useWindowDimensions} from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 // import AudioPlayer from '../AudioPlayer';
 import {Message as MessageModel} from '../../src/models';
 // import DocumentMsg from '../DocumentMsg';

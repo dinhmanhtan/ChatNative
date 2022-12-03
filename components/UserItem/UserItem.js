@@ -1,8 +1,8 @@
-import React from "react";
-import { Text, Image, View, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/core";
-import styles from "./styles";
-import { Feather } from "@expo/vector-icons";
+import React from 'react';
+import {Text, Image, View, Pressable} from 'react-native';
+import {useNavigation} from '@react-navigation/core';
+import styles from './styles';
+import Feather from 'react-native-vector-icons/Feather';
 
 export default function UserItem({
   user,
@@ -16,9 +16,8 @@ export default function UserItem({
     <Pressable
       onPress={onPress}
       // onLongPress={onLongPress}
-      style={styles.container}
-    >
-      <Image source={{ uri: user.imageUri }} style={styles.image} />
+      style={styles.container}>
+      <Image source={{uri: user.imageUri}} style={styles.image} />
 
       <View style={styles.rightContainer}>
         <Text style={styles.name}>{user.name}</Text>
@@ -27,7 +26,7 @@ export default function UserItem({
 
       {isSelected !== undefined && (
         <Feather
-          name={isSelected ? "check-circle" : "circle"}
+          name={isSelected ? 'check-circle' : 'circle'}
           size={20}
           color="#4f4f4f"
         />

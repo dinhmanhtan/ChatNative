@@ -210,12 +210,12 @@ const Message = props => {
             </Pressable>
           )}
           {/* {soundURI && <AudioPlayer soundURI={soundURI} />} */}
-          {/* {documentURI && (
+          {documentURI && (
             <DocumentMsg
               documentURI={documentURI}
               onLongPress={setAsMessageReply}
             />
-          )} */}
+          )}
           {!!message.content && (
             <Text style={{color: isMe ? 'white' : 'black'}}>
               {message.content}
