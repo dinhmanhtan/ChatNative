@@ -1,5 +1,7 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.google.gms.google-services'
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
 
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -85,6 +87,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
  * ]
  */
 
+
 project.ext.react = [
     enableHermes: true,  // clean and rebuild if changing
 ]
@@ -140,6 +143,13 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
+
+    packagingOptions {
+    pickFirst 'lib/x86/libc++_shared.so'
+    pickFirst 'lib/x86_64/libc++_shared.so'
+    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+    pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
 
     defaultConfig {
         applicationId "com.chatnative"
@@ -255,6 +265,10 @@ android {
     }
 }
 
+
+
+
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
@@ -262,6 +276,8 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation platform('com.google.firebase:firebase-bom:31.1.0')
+    implementation 'com.google.firebase:firebase-analytics'
 
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
