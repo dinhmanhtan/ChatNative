@@ -232,6 +232,7 @@ export default function ChatRoomScreen({navigation}) {
         chatRoom={chatRoom}
         messageReplyTo={messageReplyTo}
         removeMessageReplyTo={() => setMessageReplyTo(null)}
+        otherUsers={otherUsers}
       />
     </SafeAreaView>
   );

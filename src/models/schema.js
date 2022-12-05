@@ -216,6 +216,13 @@ export const schema = {
                         "associatedWith": "userID"
                     }
                 },
+                "tokenFCM": {
+                    "name": "tokenFCM",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -507,5 +514,5 @@ export const schema = {
             }
         }
     },
-    "version": "c8cd61d18366cee7fa38d04773833fd5"
+    "version": "d994f4050e09d4c25fdf20bcdfbe9197"
 };

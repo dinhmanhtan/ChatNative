@@ -14,6 +14,10 @@ import {
   VOXIMPLANT_APP,
   PASS,
 } from './components/VideoCall/Constants';
+import messaging from '@react-native-firebase/messaging';
+// import NotificationService from './components/NotificationService';
+import notifee from '@notifee/react-native';
+import NotificationService from './components/NotificationService';
 
 // import moment from "moment";
 
@@ -81,20 +85,73 @@ function App() {
   }, [user?.id]);
 
   useEffect(() => {
+    async function requestUserPermission() {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (enabled) {
+        console.log('Authorization status:', authStatus);
+      }
+    }
+    requestUserPermission();
+  }, []);
+
+  // Get token FCM
+  useEffect(() => {
+    // Get the device token
+
+    if (user) {
+      messaging()
+        .getToken()
+        .then(token => {
+          console.log(token);
+          DataStore.save(
+            User.copyOf(user, u => {
+              u.tokenFCM = token;
+            }),
+          );
+        });
+
+      // If using other push notification providers (ie Amazon SNS, etc)
+      // you may need to get the APNs token instead for iOS:
+      // if(Platform.OS == 'ios') { messaging().getAPNSToken().then(token => { return saveTokenToDatabase(token); }); }
+
+      // Listen to whether the token changes
+      return messaging().onTokenRefresh(token => {
+        console.log(token);
+      });
+    }
+  }, [user]);
+
+  //
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('foregroundMessage', JSON.stringify(remoteMessage));
+      NotificationService.DisplayNotification(remoteMessage);
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+    return unsubscribe;
+  });
+
+  // useEffect(() => {
+  //   notifee.onBackgroundEvent(async data => {
+  //     if (data.type == 3) {
+  //       console.log('notee', data.detail.data);
+  //     }
+  //   });
+  // });
+
+  useEffect(() => {
     // console.log('fetch');
     fetchUser();
   }, []);
 
-  // const updateName = async (name) => {
-  //   if (!user) {
-  //     return;
-  //   }
-  //   const response = await DataStore.save(
-  //     User.copyOf(user, (updated) => {
-  //       updated.name = name;
-  //     })
-  //   );
-  // };
+  // messaging().onMessage(onMessageReceived => {
+  //   console.log(onMessageReceived);
+  // });
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -122,7 +179,7 @@ function App() {
     console.log(response);
   };
 
-  // Video Call
+  //----------------- Video Call
 
   // const [userCalls, setUserCalls] = useState(null);
   // const [fetchUsers, setFetchUsers] = useState(false);

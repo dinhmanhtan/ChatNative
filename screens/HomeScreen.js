@@ -16,12 +16,9 @@ import ChatRoomItem from '../components/ChatRoomItem';
 import {Voximplant} from 'react-native-voximplant';
 import calls from '../components/VideoCall/Store';
 import {useNavigation} from '@react-navigation/native';
-
-// import {
-//   VOXIMPLANT_ACCOUNT,
-//   VOXIMPLANT_APP,
-//   PASS,
-// } from '../components/VideoCall/Constants';
+import messaging from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
+import NotificationService from '../components/NotificationService';
 
 export default function HomeScreen() {
   LogBox.ignoreAllLogs();
@@ -31,6 +28,32 @@ export default function HomeScreen() {
   const voximplant = Voximplant.getInstance();
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      // console.log(remoteMessage);
+      if (remoteMessage.data.type == 'MESSAGE')
+        navigation.navigate('ChatRoom', {
+          id: remoteMessage.data.chatroomID,
+        });
+
+      NotificationService.DisplayNotification(remoteMessage);
+    });
+  });
+
+  // notifee.onBackgroundEvent(async ({type, detail}) => {
+  //   // console.log(data);
+
+  //   // Check if the user pressed the "Mark as read" action
+  //   if (type == 3) {
+  //     if (detail.notification.data.type === 'MESSAGE')
+  //       navigation.navigate('ChatRoom', {
+  //         id: detail.notification.data.chatroomID,
+  //       });
+
+  //     await notifee.cancelNotification(notification.id);
+  //   }
+  // });
 
   const fetchuserAuth = async () => {
     // console.log('bb');

@@ -54,6 +54,7 @@ export declare class User {
   readonly lastOnlineAt?: number | null;
   readonly ChatRooms?: (ChatRoomUser | null)[] | null;
   readonly Messages?: (Message | null)[] | null;
+  readonly tokenFCM?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   constructor(init: ModelInit<User, UserMetaData>);

@@ -27,11 +27,18 @@ import {v4 as uuidv4} from 'uuid';
 // import AudioPlayer from '../AudioPlayer';
 import MessageComponent from '../Message';
 import DocumentPicker from 'react-native-document-picker';
+import NotificationService from '../NotificationService';
+import messaging from '@react-native-firebase/messaging';
 
 import {useNavigation} from '@react-navigation/core';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
-const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
+const MessageInput = ({
+  chatRoom,
+  messageReplyTo,
+  removeMessageReplyTo,
+  otherUsers,
+}) => {
   const [message, setMessage] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
@@ -96,19 +103,42 @@ const MessageInput = ({chatRoom, messageReplyTo, removeMessageReplyTo}) => {
     console.warn('On plus clicked');
   };
 
-  const onPress = () => {
+  const onPress = async () => {
+    const userAuth = await Auth.currentAuthenticatedUser();
+    const mytoken = await messaging().getToken();
+    var messageFCM;
     if (image) {
-      console.log('message');
+      // console.log('message');
+      messageFCM = '[Image]';
       sendImage();
     } else if (soundURI) {
+      messageFCM = '[Audio]';
       sendAudio();
     } else if (message) {
+      messageFCM = message;
       sendMessage();
     } else if (documentURI) {
+      messageFCM = '[Document]';
       sendDocument();
     } else {
       onPlusClicked();
     }
+
+    var tokens = otherUsers
+      .filter(u => u.tokenFCM != mytoken)
+      .map(u => u.tokenFCM);
+    console.log(tokens, chatRoom.isGroup);
+    const data = {
+      body: messageFCM,
+      title: chatRoom.name ? chatRoom.name : 'Message',
+      type: 'MESSAGE',
+      token: chatRoom.isGroup ? tokens : tokens[0],
+      chatroomID: chatRoom.id,
+      username: userAuth.username,
+    };
+    if (!chatRoom.isGroup)
+      NotificationService.sendSingleDeviceNotification(data);
+    else NotificationService.sendMultiDeviceNotification(data);
   };
 
   const resetFields = () => {
