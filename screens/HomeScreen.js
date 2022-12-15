@@ -14,7 +14,7 @@ import {Auth, DataStore} from 'aws-amplify';
 import {ChatRoom, ChatRoomUser, Message} from '../src/models';
 import ChatRoomItem from '../components/ChatRoomItem';
 import {Voximplant} from 'react-native-voximplant';
-import calls from '../components/VideoCall/Store';
+// import calls from '../components/VideoCall/Store';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';

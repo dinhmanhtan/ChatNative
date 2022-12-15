@@ -9,11 +9,7 @@ import {Message, User} from './src/models';
 import {AmplifyTheme} from 'aws-amplify-react-native';
 import {StatusBar, Platform} from 'react-native';
 import {Voximplant} from 'react-native-voximplant';
-import {
-  VOXIMPLANT_ACCOUNT,
-  VOXIMPLANT_APP,
-  PASS,
-} from './components/VideoCall/Constants';
+
 import messaging from '@react-native-firebase/messaging';
 // import NotificationService from './components/NotificationService';
 import notifee from '@notifee/react-native';
@@ -222,73 +218,6 @@ function App() {
       postUser();
     }
   }, [userData]);
-
-  //--------------- Login user to Voximplant
-  async function login() {
-    // console.log(userAuth);
-    console.log(
-      `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
-    );
-    try {
-      let clientState = await voximplant.getClientState();
-      if (clientState === Voximplant.ClientState.DISCONNECTED) {
-        await voximplant.connect();
-        await voximplant.login(
-          `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
-          PASS,
-        );
-      }
-      if (clientState === Voximplant.ClientState.CONNECTED) {
-        await voximplant.login(
-          `${userData.username}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
-          PASS,
-        );
-      }
-      setIsLoginCall(true);
-      console.log('login1');
-    } catch (e) {
-      let message;
-      switch (e.name) {
-        case Voximplant.ClientEvents.ConnectionFailed:
-          message = 'Connection error, check your internet connection';
-          break;
-        case Voximplant.ClientEvents.AuthResult:
-          message = convertCodeMessage(e.code);
-          break;
-        default:
-          message = 'Unknown error. Try again';
-      }
-      showLoginError(message);
-    }
-  }
-
-  function convertCodeMessage(code) {
-    switch (code) {
-      case 401:
-        return 'Invalid password';
-      case 404:
-        return 'Invalid user';
-      case 491:
-        return 'Invalid state';
-      default:
-        return 'Try again later';
-    }
-  }
-
-  function showLoginError(message) {
-    console.log(message);
-    Alert.alert('Login error', message, [
-      {
-        text: 'OK',
-      },
-    ]);
-  }
-
-  // useEffect(() => {
-  //   if (userData && isAddCalluser) {
-  //     login();
-  //   }
-  // }, [userData, isAddCalluser]);
 
   useEffect(() => {
     if (userData) {

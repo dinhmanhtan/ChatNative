@@ -14,10 +14,7 @@ import {Auth, DataStore} from 'aws-amplify';
 import {ChatRoom, ChatRoomUser, User} from '../src/models';
 import moment from 'moment';
 import {useNavigation} from '@react-navigation/core';
-import {
-  VOXIMPLANT_ACCOUNT,
-  VOXIMPLANT_APP,
-} from '../components/VideoCall/Constants';
+
 import {Voximplant} from 'react-native-voximplant';
 
 const ChatRoomHeader = ({id, children}) => {
@@ -26,6 +23,9 @@ const ChatRoomHeader = ({id, children}) => {
   const [allUsers, setAllUsers] = useState([]);
   const [chatRoom, setChatRoom] = useState(undefined);
   const navigation = useNavigation();
+
+  const VOXIMPLANT_APP = 'test';
+  const VOXIMPLANT_ACCOUNT = 'tan2527';
 
   const fetchUsers = async () => {
     const fetchedUsers = (await DataStore.query(ChatRoomUser))
@@ -79,45 +79,6 @@ const ChatRoomHeader = ({id, children}) => {
   };
 
   const isGroup = allUsers.length > 2;
-
-  //
-  // async function makeCall(isVideoCall) {
-  //   console.log('user', user.name);
-  //   try {
-  //     if (Platform.OS === 'android') {
-  //       let permissions = [PermissionsAndroid.PERMISSIONS.RECORD_AUDIO];
-  //       if (isVideoCall) {
-  //         permissions.push(PermissionsAndroid.PERMISSIONS.CAMERA);
-  //       }
-  //       const granted = await PermissionsAndroid.requestMultiple(permissions);
-  //       const recordAudioGranted =
-  //         granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted';
-  //       const cameraGranted =
-  //         granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted';
-  //       if (recordAudioGranted) {
-  //         if (isVideoCall && !cameraGranted) {
-  //           console.warn(
-  //             'MainScreen: makeCall: camera permission is not granted',
-  //           );
-  //           return;
-  //         }
-  //       } else {
-  //         console.warn(
-  //           'MainScreen: makeCall: record audio permission is not granted',
-  //         );
-  //         return;
-  //       }
-  //     }
-  //     navigation.navigate('Call', {
-  //       isVideoCall: isVideoCall,
-  //       callee: `${user.name}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
-  //       isIncomingCall: false,
-  //       chatroomID: id,
-  //     });
-  //   } catch (e) {
-  //     console.warn(`MainScreen: makeCall failed: ${e}`);
-  //   }
-  // }
 
   async function makeCall(isVideoCall) {
     // console.log(
