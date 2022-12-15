@@ -151,21 +151,21 @@ export default function HomeScreen() {
   //   }
   // }, [userAuth]);
   // console.log('rooms', chatRooms);
-
+  // ---------------------------------
   // Listen for coming call
-  useEffect(() => {
-    // console.log('islogin', isLoginCall);
+  // useEffect(() => {
+  //   // console.log('islogin', isLoginCall);
 
-    voximplant.on(Voximplant.ClientEvents.IncomingCall, incomingCallEvent => {
-      calls.set(incomingCallEvent.call.callId, incomingCallEvent.call);
-      navigation.navigate('IncomingCall', {
-        callId: incomingCallEvent.call.callId,
-      });
-    });
-    return function cleanup() {
-      voximplant.off(Voximplant.ClientEvents.IncomingCall);
-    };
-  });
+  //   voximplant.on(Voximplant.ClientEvents.IncomingCall, incomingCallEvent => {
+  //     calls.set(incomingCallEvent.call.callId, incomingCallEvent.call);
+  //     navigation.navigate('IncomingCall', {
+  //       callId: incomingCallEvent.call.callId,
+  //     });
+  //   });
+  //   return function cleanup() {
+  //     voximplant.off(Voximplant.ClientEvents.IncomingCall);
+  //   };
+  // });
 
   if (!userAuth) {
     return <ActivityIndicator />;

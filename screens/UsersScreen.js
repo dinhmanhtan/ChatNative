@@ -14,12 +14,32 @@ import NewGroupButton from '../components/NewGroupButton';
 import {useNavigation} from '@react-navigation/native';
 import {Auth, DataStore} from 'aws-amplify';
 import {ChatRoom, User, ChatRoomUser} from '../src/models';
-export default function UsersScreen() {
+import {Searchbar, Button} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
+
+export default function UsersScreen(props) {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isNewGroup, setIsNewGroup] = useState(false);
   const [dbUser, setDBUser] = useState(undefined);
   const [chatRoomUsers, setChatRoomUsers] = useState([]);
+  const [groupName, setGroupName] = useState(null);
+
+  const search = props.route?.params && props.route.params['search'];
+
+  // console.log(search);
+  const [searchQuery, setSearchQuery] = useState('');
+  useEffect(() => {
+    if (
+      !isNewGroup &&
+      props.route?.params &&
+      props.route.params['isNewGroup']
+    ) {
+      setIsNewGroup(true);
+    }
+  });
+
+  const onChangeSearch = query => setSearchQuery(query);
 
   const fetchChatRooms = async () => {
     const chatRooms = await DataStore.query(ChatRoomUser);
@@ -106,7 +126,8 @@ export default function UsersScreen() {
     };
 
     if (isNewGroup) {
-      newChatRoomData.name = 'New group';
+      console.log(groupName);
+      newChatRoomData.name = groupName != null ? groupName : 'New group';
       newChatRoomData.imageUri =
         'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/group.jpeg';
       newChatRoomData.isGroup = true;
@@ -144,11 +165,31 @@ export default function UsersScreen() {
   };
 
   const saveGroup = async () => {
-    await createChatRoom(selectedUsers);
+    if (selectedUsers.length > 0) {
+      await createChatRoom(selectedUsers);
+    } else {
+    }
   };
-
+  console.log(groupName);
   return (
     <SafeAreaView style={styles.page}>
+      {isNewGroup && (
+        <TextInput
+          label="Group name"
+          value={groupName}
+          onChangeText={text => setGroupName(text)}
+          mode="outlined"
+          style={{margin: 15, padding: 0}}
+        />
+      )}
+      {search && (
+        <Searchbar
+          placeholder="Search"
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={{margin: 7, marginHorizontal: 15, marginBottom: 20}}
+        />
+      )}
       <FlatList
         data={users}
         renderItem={({item}) => (
@@ -159,23 +200,31 @@ export default function UsersScreen() {
           />
         )}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={() => (
-          <NewGroupButton
-            onPress={() => {
-              const u = users.filter(user => user.id !== dbUser?.id);
-              setUsers(u);
-              setIsNewGroup(!isNewGroup);
-            }}
-          />
-        )}
+        // ListHeaderComponent={() => (
+        //   <NewGroupButton
+        //     onPress={() => {
+        //       const u = users.filter(user => user.id !== dbUser?.id);
+        //       setUsers(u);
+        //       setIsNewGroup(!isNewGroup);
+        //     }}
+        //   />
+        // )}
       />
 
       {isNewGroup && (
-        <Pressable style={styles.button} onPress={saveGroup}>
-          <Text style={styles.buttonText}>
-            Save group ({selectedUsers.length})
-          </Text>
-        </Pressable>
+        <View style={styles.buttonContainer}>
+          <Button style={styles.button} buttonColor="white" onPress={saveGroup}>
+            Save
+          </Button>
+          <Button
+            style={styles.button}
+            onPress={() => {
+              props.navigation.setParams({isNewGroup: false});
+              setIsNewGroup(false);
+            }}>
+            Cancel
+          </Button>
+        </View>
       )}
     </SafeAreaView>
   );
@@ -186,12 +235,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   button: {
     backgroundColor: '#3777f0',
     marginHorizontal: 10,
-    padding: 10,
+    // padding: 10,
     alignItems: 'center',
     borderRadius: 10,
+    width: 100,
   },
   buttonText: {
     color: 'white',

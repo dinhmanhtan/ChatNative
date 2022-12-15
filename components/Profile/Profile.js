@@ -1,5 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {View, SafeAreaView, StyleSheet, ScrollView} from 'react-native';
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  AsyncStorage,
+} from 'react-native';
 import {
   Avatar,
   Title,
@@ -18,12 +24,14 @@ import {ChatRoomUser} from '../../src/models';
 const ProfileScreen = () => {
   const [authUser, setAuthtUser] = useState(null);
   const logOut = async () => {
+    await AsyncStorage.clear();
     await DataStore.clear();
     Auth.signOut();
   };
   useEffect(() => {
     const fetchUser = async () => {
       const authUser = await Auth.currentAuthenticatedUser();
+
       setAuthtUser(authUser);
       // console.log(authUser);
       // const b = await DataStore.query(ChatRoomUser);

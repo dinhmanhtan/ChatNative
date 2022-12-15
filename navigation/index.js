@@ -14,18 +14,22 @@ import UsersScreen from '../screens/UsersScreen';
 import ChatRoomHeader from './ChatRoomHeader';
 import GroupInfoScreen from '../screens/GroupInfoScreen';
 import ProfileScreen from '../components/Profile/Profile';
-import LoginScreen from '../components/VideoCall/LoginScreen';
-import MainScreen from '../components/VideoCall/MainScreen';
-import CallScreen from '../components/VideoCall/CallScreen';
-import IncomingCallScreen from '../components/VideoCall/IncomingCallScreen';
 import LocationScreen from '../screens/LocationScreen';
 import DocumentScreen from '../screens/DocumentScreen';
+
+import LoginScreen from '../components/screens/LoginScreen';
+import MainScreen from '../components/screens/MainScreen';
+import CallScreen from '../components/screens/CallScreen';
+import IncomingCallScreen from '../components/screens/IncomingCallScreen';
+import {navigationRef} from '../components/routes/routes';
+import CreateChatHeader from './CreateChatHeader';
+import EditProfileScreen from '../components/Profile/EditProfileScreen';
 
 const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator>
         <Stack.Screen
           name="Home"
@@ -44,9 +48,10 @@ const Navigation = () => {
         <Stack.Screen
           name="UsersScreen"
           component={UsersScreen}
-          options={{
+          options={({navigation, route}) => ({
             title: 'Users',
-          }}
+            headerRight: props => <CreateChatHeader {...navigation} />,
+          })}
         />
         <Stack.Screen
           name="ProfileScreen"
@@ -87,6 +92,13 @@ const Navigation = () => {
           component={LocationScreen}
           options={{
             title: 'Location',
+          }}
+        />
+        <Stack.Screen
+          name="EditProfileScreen"
+          component={EditProfileScreen}
+          options={{
+            title: 'Edit',
           }}
         />
       </Stack.Navigator>

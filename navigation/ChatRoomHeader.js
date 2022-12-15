@@ -81,8 +81,48 @@ const ChatRoomHeader = ({id, children}) => {
   const isGroup = allUsers.length > 2;
 
   //
+  // async function makeCall(isVideoCall) {
+  //   console.log('user', user.name);
+  //   try {
+  //     if (Platform.OS === 'android') {
+  //       let permissions = [PermissionsAndroid.PERMISSIONS.RECORD_AUDIO];
+  //       if (isVideoCall) {
+  //         permissions.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+  //       }
+  //       const granted = await PermissionsAndroid.requestMultiple(permissions);
+  //       const recordAudioGranted =
+  //         granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted';
+  //       const cameraGranted =
+  //         granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted';
+  //       if (recordAudioGranted) {
+  //         if (isVideoCall && !cameraGranted) {
+  //           console.warn(
+  //             'MainScreen: makeCall: camera permission is not granted',
+  //           );
+  //           return;
+  //         }
+  //       } else {
+  //         console.warn(
+  //           'MainScreen: makeCall: record audio permission is not granted',
+  //         );
+  //         return;
+  //       }
+  //     }
+  //     navigation.navigate('Call', {
+  //       isVideoCall: isVideoCall,
+  //       callee: `${user.name}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
+  //       isIncomingCall: false,
+  //       chatroomID: id,
+  //     });
+  //   } catch (e) {
+  //     console.warn(`MainScreen: makeCall failed: ${e}`);
+  //   }
+  // }
+
   async function makeCall(isVideoCall) {
-    console.log('user', user.name);
+    // console.log(
+    //   'MainScreen: make call: ' + this.number + ', isVideo:' + isVideoCall,
+    // );
     try {
       if (Platform.OS === 'android') {
         let permissions = [PermissionsAndroid.PERMISSIONS.RECORD_AUDIO];
@@ -91,9 +131,9 @@ const ChatRoomHeader = ({id, children}) => {
         }
         const granted = await PermissionsAndroid.requestMultiple(permissions);
         const recordAudioGranted =
-          granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted';
+          granted['android.permission.RECORD_AUDIO'] === 'granted';
         const cameraGranted =
-          granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted';
+          granted['android.permission.CAMERA'] === 'granted';
         if (recordAudioGranted) {
           if (isVideoCall && !cameraGranted) {
             console.warn(
@@ -109,19 +149,20 @@ const ChatRoomHeader = ({id, children}) => {
         }
       }
       navigation.navigate('Call', {
-        isVideoCall: isVideoCall,
-        callee: `${user.name}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}.voximplant.com`,
-        isIncomingCall: false,
-        chatroomID: id,
+        callId: null,
+        isVideo: isVideoCall,
+        isIncoming: false,
+        callTo: `${user.name}@${VOXIMPLANT_APP}.${VOXIMPLANT_ACCOUNT}`,
       });
     } catch (e) {
-      console.warn(`MainScreen: makeCall failed: ${e}`);
+      console.warn('MainScreen: makeCall failed: ' + e);
     }
   }
+
   //
-  useEffect(() => {
-    login();
-  }, []);
+  // useEffect(() => {
+  //   login();
+  // }, []);
   const voximplant = Voximplant.getInstance();
   async function login() {
     const userData = await Auth.currentAuthenticatedUser();
@@ -185,7 +226,11 @@ const ChatRoomHeader = ({id, children}) => {
         color="black"
         style={{marginRight: 5}}
       />
-      <Pressable onPress={() => makeCall(true)}>
+      <Pressable
+        onPress={() => {
+          makeCall(true);
+          // navigation.navigate('Main');
+        }}>
         <MaterialIcons
           name="video-call"
           size={27}

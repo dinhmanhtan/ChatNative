@@ -7,7 +7,7 @@ import awsmobile from './src/aws-exports';
 import {withAuthenticator} from 'aws-amplify-react-native';
 import {Message, User} from './src/models';
 import {AmplifyTheme} from 'aws-amplify-react-native';
-import {StatusBar} from 'react-native';
+import {StatusBar, Platform} from 'react-native';
 import {Voximplant} from 'react-native-voximplant';
 import {
   VOXIMPLANT_ACCOUNT,
@@ -18,6 +18,8 @@ import messaging from '@react-native-firebase/messaging';
 // import NotificationService from './components/NotificationService';
 import notifee from '@notifee/react-native';
 import NotificationService from './components/NotificationService';
+import LoginManager from './components/manager/LoginManager';
+import CallManager from './components/manager/CallManager';
 
 // import moment from "moment";
 
@@ -215,10 +217,6 @@ function App() {
       .finally(() => setIsAddCallUser(true));
   };
 
-  // useEffect(() => {
-  //   getArticlesFromApi();
-  // }, []);
-
   useEffect(() => {
     if (userData) {
       postUser();
@@ -286,11 +284,32 @@ function App() {
     ]);
   }
 
+  // useEffect(() => {
+  //   if (userData && isAddCalluser) {
+  //     login();
+  //   }
+  // }, [userData, isAddCalluser]);
+
   useEffect(() => {
-    if (userData && isAddCalluser) {
-      login();
+    if (userData) {
+      LoginManager.getInstance().loginWithPassword(
+        userData.username + '@test.tan2527.voximplant.com',
+        '12345678',
+      );
     }
-  }, [userData, isAddCalluser]);
+  }, [userData]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      if (CallManager.getInstance().showIncomingCallScreen) {
+        this.props.navigation.navigate('IncomingCall', {
+          callId: CallManager.getInstance().call.callId,
+          isVideo: null,
+          from: CallManager.getInstance().call.getEndpoints()[0].displayName,
+        });
+      }
+    }
+  }, []);
 
   return (
     <SafeAreaProvider>
