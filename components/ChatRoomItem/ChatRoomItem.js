@@ -15,7 +15,7 @@ import {Auth} from '@aws-amplify/auth';
 import moment from 'moment';
 
 export default function ChatRoomItem({chatroom}) {
-  // console.log(chatroom);
+  //console.log(chatroom);
   LogBox.ignoreAllLogs();
   // const [users, setUsers] = useState<User[]>([]); // all users in this chatroom
   const [users, setUsers] = useState([]); // the display user
@@ -55,7 +55,7 @@ export default function ChatRoomItem({chatroom}) {
         setLastMessage,
       );
     }
-  }, []);
+  }, [chatroom]);
   useEffect(() => {
     if (lastMessage && users && authUser) {
       // console.log(authUser.username);

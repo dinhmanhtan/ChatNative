@@ -14,8 +14,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
-import {Auth, DataStore} from 'aws-amplify';
+import {Auth, DataStore, Storage} from 'aws-amplify';
 import {User} from '../../src/models';
+import {v4 as uuidv4} from 'uuid';
 
 // import BottomSheet from 'reanimated-bottom-sheet';
 // import Animated from 'react-native-reanimated';
@@ -31,6 +32,7 @@ const EditProfileScreen = () => {
 
   const [authUser, setAuthtUser] = useState(null);
   const [user, setUser] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -67,11 +69,31 @@ const EditProfileScreen = () => {
     }
   };
 
-  const navigation = useNavigation();
-
-  // const submit = async () => {
-
-  // }
+  const getBlob = async uri => {
+    const respone = await fetch(uri);
+    const blob = await respone.blob();
+    return blob;
+  };
+  const saveProfile = async () => {
+    if (!image || !user) {
+      return;
+    }
+    const uriParts = image.split('.');
+    const extenstion = uriParts[uriParts.length - 1];
+    const blob = await getBlob(image);
+    const {key} = await Storage.put(`${uuidv4()}.${extenstion}`, blob);
+    const url = await Storage.get(key);
+    //console.log(url);
+    const navigateProfileScreen = u => {
+      navigation.navigate('ProfileScreen');
+    };
+    //save avatar
+    await DataStore.save(
+      User.copyOf(user, updated => {
+        updated.imageUri = url;
+      }),
+    ).then(navigateProfileScreen);
+  };
 
   if (!authUser) {
     return <ActivityIndicator />;
@@ -185,9 +207,7 @@ const EditProfileScreen = () => {
             ]}
           />
         </View>
-        <TouchableOpacity
-          style={styles.commandButton}
-          onPress={() => navigation.navigate('ProfileScreen')}>
+        <TouchableOpacity style={styles.commandButton} onPress={saveProfile}>
           <Text style={styles.panelButtonTitle}>Submit</Text>
         </TouchableOpacity>
       </View>

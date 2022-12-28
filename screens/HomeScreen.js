@@ -17,52 +17,70 @@ import {Voximplant} from 'react-native-voximplant';
 // import calls from '../components/VideoCall/Store';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
-import notifee, {EventType} from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 import NotificationService from '../components/NotificationService';
+import {User} from '../src/models';
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
   LogBox.ignoreAllLogs();
   const [chatRooms, setChatRooms] = useState([]);
   const [observe, setObserve] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
-  const voximplant = Voximplant.getInstance();
+  const [user, setUser] = useState(null);
 
-  const navigation = useNavigation();
+  const navigation1 = useNavigation();
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'android') {
+  //     if (CallManager.getInstance().showIncomingCallScreen) {
+  //       navigation.navigate('IncomingCall', {
+  //         callId: CallManager.getInstance().call.callId,
+  //         isVideo: null,
+  //         from: CallManager.getInstance().call.getEndpoints()[0].displayName,
+  //       });
+  //     }
+  //   }
+  // }, []);
 
   useEffect(() => {
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      // console.log(remoteMessage);
-      if (remoteMessage.data.type == 'MESSAGE')
-        navigation.navigate('ChatRoom', {
-          id: remoteMessage.data.chatroomID,
-        });
+      // console.log('remote', remoteMessage);
+      // if (remoteMessage.data.type == 'MESSAGE')
+      //   navigation.navigate('ChatRoom', {
+      //     id: remoteMessage.data.chatroomID,
+      //   });
 
       NotificationService.DisplayNotification(remoteMessage);
     });
   });
 
-  // notifee.onBackgroundEvent(async ({type, detail}) => {
-  //   // console.log(data);
+  notifee.onBackgroundEvent(async ({type, detail}) => {
+    console.log(type, detail);
 
-  //   // Check if the user pressed the "Mark as read" action
-  //   if (type == 3) {
-  //     if (detail.notification.data.type === 'MESSAGE')
-  //       navigation.navigate('ChatRoom', {
-  //         id: detail.notification.data.chatroomID,
-  //       });
+    // Check if the user pressed the "Mark as read" action
+    if (type === 1) {
+      if (detail.notification.data.type === 'MESSAGE')
+        navigation.navigate('ChatRoom', {
+          id: detail.notification.data.chatroomID,
+        });
 
-  //     await notifee.cancelNotification(notification.id);
-  //   }
-  // });
+      // await notifee.cancelNotification(notification.id);
+    }
+  });
+
+  notifee.onForegroundEvent(async ({type, detail}) => {
+    //console.log(data);
+
+    if (type === 1) {
+      if (detail.notification.data.type === 'MESSAGE')
+        navigation1.navigate('ChatRoom', {
+          id: detail.notification.data.chatroomID,
+        });
+    }
+  });
 
   const fetchuserAuth = async () => {
-    // console.log('bb');
-
     const userData = await Auth.currentAuthenticatedUser().then(setUserAuth);
-
-    // console.log(userData);
-
-    // setChatRooms(chatRooms);
   };
   useEffect(() => {
     fetchuserAuth();
@@ -70,24 +88,39 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    const fb = item => {
-      // console.log('item');
-      setChatRooms(
-        item
-          .filter(
-            chatRoomUser => chatRoomUser.user.id === userAuth.attributes.sub,
-          )
-          .map(chatRoomUser => chatRoomUser.chatRoom),
-      );
-      setObserve(true);
-      // setUserAuth(userData);
-    };
+    const focusHandler = navigation.addListener('focus', () => {
+      fetchUser();
+      fetchChatRooms();
+    });
+    return focusHandler;
+  }, [navigation]);
 
-    const fetchChatRooms = async () => {
-      // console.log('fetchChatRooms');
-      const b = await DataStore.query(ChatRoomUser).then(fb);
-    };
+  const fetchUser = async () => {
+    const authUser = await Auth.currentAuthenticatedUser();
+    setUserAuth(authUser);
+    const u = await DataStore.query(User, authUser.attributes.sub);
+    setUser(u);
+    navigation.setParams({uri: u.imageUri});
+  };
 
+  const fb = item => {
+    // console.log('item', item);
+    setChatRooms(
+      item
+        .filter(
+          chatRoomUser => chatRoomUser.user.id === userAuth.attributes.sub,
+        )
+        .map(chatRoomUser => chatRoomUser.chatRoom),
+    );
+    setObserve(true);
+    // setUserAuth(userData);
+  };
+
+  const fetchChatRooms = async () => {
+    // console.log('fetchChatRooms');
+    await DataStore.query(ChatRoomUser).then(fb);
+  };
+  useEffect(() => {
     if (userAuth) {
       fetchChatRooms();
     }

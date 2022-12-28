@@ -41,6 +41,8 @@ const ChatRoomHeader = ({id, children}) => {
     );
   };
 
+  console.log('aaa', user);
+
   const fetchChatRoom = async () => {
     DataStore.query(ChatRoom, id).then(setChatRoom);
   };

@@ -29,7 +29,7 @@ export default class IncomingCallScreen extends React.Component {
     this.call = CallManager.getInstance().getCallById(callId);
 
     this.state = {
-      displayName: null,
+      displayName: params ? params.from : null,
     };
   }
 
@@ -109,7 +109,9 @@ export default class IncomingCallScreen extends React.Component {
         ' endpoint id: ' +
         event.endpoint.id,
     );
-    this.setState({displayName: event.endpoint.displayName});
+    if (event.endpoint.displayName) {
+      this.setState({displayName: event.endpoint.displayName});
+    }
   };
 
   render() {

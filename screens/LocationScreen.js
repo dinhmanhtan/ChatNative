@@ -7,10 +7,12 @@ import {ChatRoom, Message, Location as LocationMap} from '../src/models';
 import {useNavigation} from '@react-navigation/core';
 import {DataStore} from '@aws-amplify/datastore';
 import GetLocation from 'react-native-get-location';
+import NotificationService from '../components/NotificationService';
 
 export default function LocationScreen({route}) {
   // console.log("props", route);
   const navigation = useNavigation();
+  const [authUser, setAuthuser] = useState(null);
   const [mapRegion, setMapRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -37,6 +39,10 @@ export default function LocationScreen({route}) {
           console.warn(code, message);
         });
     })();
+    const getAuthUser = async () => {
+      await Auth.currentAuthenticatedUser().then(setAuthuser);
+    };
+    getAuthUser();
   }, []);
 
   const sendMessage = async () => {
@@ -45,11 +51,27 @@ export default function LocationScreen({route}) {
       latitude: mapRegion.latitude,
       longitude: mapRegion.longitude,
     });
+    const user = await Auth.currentAuthenticatedUser();
     const navigateToChatroom = user => {
-      console.log(route.params.chatRoom.id);
+      const data = {
+        body: '[Location]',
+        title: route.params.chatRoom.name
+          ? route.params.chatRoom.name
+          : 'Message',
+        type: 'MESSAGE',
+        token: route.params.chatRoom.isGroup
+          ? route.params.otherTokens
+          : route.params.otherTokens[0],
+        chatroomID: route.params.chatRoom.id,
+        username: authUser.username,
+      };
+      if (!route.params.chatRoom.isGroup)
+        NotificationService.sendSingleDeviceNotification(data);
+      else NotificationService.sendMultiDeviceNotification(data);
+
+      //console.log(route.params.chatRoom.id);
       navigation.navigate('ChatRoom', {id: route.params.chatRoom.id});
     };
-    const user = await Auth.currentAuthenticatedUser();
 
     const updateLastMessage = async newMessage => {
       console.log(route.params.chatRoom);

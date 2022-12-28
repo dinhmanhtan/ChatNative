@@ -5,7 +5,7 @@
  */
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import * as React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, Image, useWindowDimensions, Pressable} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
@@ -24,6 +24,8 @@ import IncomingCallScreen from '../components/screens/IncomingCallScreen';
 import {navigationRef} from '../components/routes/routes';
 import CreateChatHeader from './CreateChatHeader';
 import EditProfileScreen from '../components/Profile/EditProfileScreen';
+import {User} from '../src/models';
+import {Auth, DataStore} from 'aws-amplify';
 
 const Stack = createStackNavigator();
 
@@ -34,7 +36,9 @@ const Navigation = () => {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{headerTitle: HomeHeader}}
+          options={({navigation, route}) => ({
+            headerTitle: props => <HomeHeader {...navigation} {...route} />,
+          })}
         />
         <Stack.Screen
           name="ChatRoom"
@@ -108,7 +112,22 @@ const Navigation = () => {
 
 const HomeHeader = props => {
   const {width} = useWindowDimensions();
-  const navigation = useNavigation();
+  const navigation1 = useNavigation();
+  const [user, setUser] = useState(null);
+
+  const uri = props.params && props.params['uri'];
+  // console.log(uri);
+
+  const fetchUser = async () => {
+    const authUser = await Auth.currentAuthenticatedUser();
+    await DataStore.query(User, authUser.attributes.sub).then(setUser);
+  };
+
+  // console.log(props);
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   return (
     <View
@@ -119,10 +138,13 @@ const HomeHeader = props => {
         padding: 10,
         alignItems: 'center',
       }}>
-      <Pressable onPress={() => navigation.navigate('ProfileScreen')}>
+      <Pressable onPress={() => navigation1.navigate('ProfileScreen')}>
         <Image
           source={{
-            uri: 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/1.jpg',
+            uri:
+              uri ||
+              (user && user.imageUri) ||
+              'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/1.jpg',
           }}
           style={{width: 30, height: 30, borderRadius: 30}}
         />
@@ -142,7 +164,7 @@ const HomeHeader = props => {
         color="black"
         style={{marginHorizontal: 10}}
       />
-      <Pressable onPress={() => navigation.navigate('UsersScreen')}>
+      <Pressable onPress={() => navigation1.navigate('UsersScreen')}>
         <Feather
           name="edit-2"
           size={24}

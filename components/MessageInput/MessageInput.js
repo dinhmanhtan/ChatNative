@@ -32,6 +32,7 @@ import messaging from '@react-native-firebase/messaging';
 
 import {useNavigation} from '@react-navigation/core';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {set} from 'react-native-reanimated';
 
 const MessageInput = ({
   chatRoom,
@@ -48,6 +49,7 @@ const MessageInput = ({
   const [recording, setRecording] = useState(null);
   const [soundURI, setSoundURI] = useState(null);
   const [documentURI, setDocumentURI] = useState(null);
+  const [otherTokens, setOtherTokens] = useState([]);
   const navigation = useNavigation();
 
   // useEffect(() => {
@@ -67,6 +69,17 @@ const MessageInput = ({
   //     }
   //   })();
   // }, []);
+
+  useEffect(() => {
+    const getOtherTokens = async () => {
+      const mytoken = await messaging().getToken();
+      var tokens = otherUsers
+        .filter(u => u.tokenFCM != mytoken)
+        .map(u => u.tokenFCM);
+      setOtherTokens(tokens);
+    };
+    getOtherTokens();
+  }, []);
 
   const pickDocument = async () => {
     let result = await DocumentPicker.pick({});
@@ -88,6 +101,7 @@ const MessageInput = ({
 
     updateLastMessage(newMessage);
     resetFields();
+    // navigation.navigate('Home');
   };
 
   const updateLastMessage = async newMessage => {
@@ -105,7 +119,6 @@ const MessageInput = ({
 
   const onPress = async () => {
     const userAuth = await Auth.currentAuthenticatedUser();
-    const mytoken = await messaging().getToken();
     var messageFCM;
     if (image) {
       // console.log('message');
@@ -124,15 +137,12 @@ const MessageInput = ({
       onPlusClicked();
     }
 
-    var tokens = otherUsers
-      .filter(u => u.tokenFCM != mytoken)
-      .map(u => u.tokenFCM);
-    console.log(tokens, chatRoom.isGroup);
+    //console.log(otherTokens, chatRoom.isGroup);
     const data = {
       body: messageFCM,
       title: chatRoom.name ? chatRoom.name : 'Message',
       type: 'MESSAGE',
-      token: chatRoom.isGroup ? tokens : tokens[0],
+      token: chatRoom.isGroup ? otherTokens : otherTokens[0],
       chatroomID: chatRoom.id,
       username: userAuth.username,
     };
@@ -414,6 +424,7 @@ const MessageInput = ({
               navigation.navigate('LocationScreen', {
                 chatRoom: chatRoom,
                 replyToMessageID: messageReplyTo?.id,
+                otherTokens: otherTokens,
               })
             }>
             <Ionicons name="ios-location-outline" size={24} color="black" />

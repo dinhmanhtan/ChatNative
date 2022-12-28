@@ -19,31 +19,36 @@ import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {ChatRoomUser} from '../../src/models';
+import {User} from '../../src/models';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({navigatetion}) => {
   const [authUser, setAuthtUser] = useState(null);
+  const [user, setUser] = useState(null);
   const logOut = async () => {
     await AsyncStorage.clear();
     await DataStore.clear();
     Auth.signOut();
   };
-  useEffect(() => {
-    const fetchUser = async () => {
-      const authUser = await Auth.currentAuthenticatedUser();
 
-      setAuthtUser(authUser);
-      // console.log(authUser);
-      // const b = await DataStore.query(ChatRoomUser);
-      // console.log(b);
-    };
+  useEffect(() => {
+    const focusHandler = navigation.addListener('focus', () => {
+      fetchUser();
+    });
+    return focusHandler;
+  }, [navigation]);
+  const fetchUser = async () => {
+    const authUser = await Auth.currentAuthenticatedUser();
+    setAuthtUser(authUser);
+    await DataStore.query(User, authUser.attributes.sub).then(setUser);
+  };
+  useEffect(() => {
     fetchUser();
   }, []);
   // const logOut = () => {
   //   Auth.signOut();
   // };
   const navigation = useNavigation();
-  if (!authUser) {
+  if (!authUser || !user) {
     return <ActivityIndicator />;
   }
 
@@ -53,7 +58,7 @@ const ProfileScreen = () => {
         <View style={{flexDirection: 'row', marginTop: 15}}>
           <Avatar.Image
             source={{
-              uri: 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/1.jpg',
+              uri: user.imageUri,
             }}
             size={80}
           />

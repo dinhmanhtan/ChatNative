@@ -126,7 +126,7 @@ export default function UsersScreen(props) {
     };
 
     if (isNewGroup) {
-      console.log(groupName);
+      // console.log(groupName);
       newChatRoomData.name = groupName != null ? groupName : 'New group';
       newChatRoomData.imageUri =
         'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/group.jpeg';
