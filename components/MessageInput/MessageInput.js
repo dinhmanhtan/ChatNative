@@ -75,8 +75,8 @@ const MessageInput = ({
       const mytoken = await messaging().getToken();
       var tokens = otherUsers
         .filter(u => u.tokenFCM != mytoken)
-        .map(u => u.tokenFCM);
-      setOtherTokens(tokens);
+        .map(u => u.tokenFCM)
+        .then(setOtherTokens);
     };
     getOtherTokens();
   }, []);
@@ -137,7 +137,7 @@ const MessageInput = ({
       onPlusClicked();
     }
 
-    //console.log(otherTokens, chatRoom.isGroup);
+    console.log(otherTokens, chatRoom.isGroup);
     const data = {
       body: messageFCM,
       title: chatRoom.name ? chatRoom.name : 'Message',
