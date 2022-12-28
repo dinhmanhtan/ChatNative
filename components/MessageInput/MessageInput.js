@@ -72,14 +72,17 @@ const MessageInput = ({
 
   useEffect(() => {
     const getOtherTokens = async () => {
-      const mytoken = await messaging().getToken();
-      var tokens = otherUsers
-        .filter(u => u.tokenFCM != mytoken)
-        .map(u => u.tokenFCM)
-        .then(setOtherTokens);
+      await messaging()
+        .getToken()
+        .then(mytoken => {
+          var tokens = otherUsers
+            .filter(u => u.tokenFCM != mytoken)
+            .map(u => u.tokenFCM);
+          setOtherTokens(tokens);
+        });
     };
     getOtherTokens();
-  }, []);
+  }, [otherUsers]);
 
   const pickDocument = async () => {
     let result = await DocumentPicker.pick({});
